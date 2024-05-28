@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screener</title>
+    <link rel="stylesheet" href="static/styles/style.css">
+    <script src="/static/function.js"></script>
+</head>
+<body>
+    <h1>Stock Screener</h1>
+    <form>
+        <div class="form-container">
+            <div class="form-group">
+                <label for="sector">Industry:</label>
+                {% for sector in sectors %}
+                    <option value="{{ sector }}">{{ sector }}</option>
+                {% endfor %}
+
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="moving-average">Moving Average:</label>
+                <select id="moving-average" name="MovingAvarage">
+                    <option value="20">MA 20 weeks</option>
+                    <option value="30">MA 30 weeks</option>
+                    <option value="50">MA 50 weeks</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="market-cap">Market Cap:</label>
+                <select id="market-cap" name="market-cap">
+                    <option value="mega">Mega (>$200B)</option>
+                    <option value="large">Large (>$10B)</option>
+                    <option value="medium">Medium (>$2B)</option>
+                    <option value="small">Small (>$300M)</option>
+                </select>
+            </div>
+            <input type="submit" value="Scan"></intput>
+        </div>
+       
+    </form>
+    <div id="summary">
+        <div class="box">
+            <span class="title">Max Week Winner: </span>
+            <span class="ticker" id="Wweek"></span>
+            <span class="percentage" id="Wweekv"></span>
+        </div>
+        <div class="box">
+            <span class="title">Max Week Loser: </span>
+            <span class="ticker" id="Lweek"></span>
+            <span class="percentage" id="Lweekv"></span>
+        </div>
+        <div class="box">
+            <span class="title">Max Month Winner: </span>
+            <span class="ticker" id="Wmonth"></span>
+            <span class="percentage" id="Wmonthv"></span>
+        </div>
+        <div class="box">
+            <span class="title">Max Month Loser: </span>
+            <span class="ticker" id="Lmonth"></span>
+            <span class="percentage" id="Lmonthv"></span>
+        </div>
+    </div>
+    
+    <div id="table-container">
+        <table>
+            <tr>
+                <th><button id="symbol">Symbol</button></th>
+                <th><button id="company-name">Company Name</button></th>
+                <th><button id="close-price">Close Price</button></th>
+                <th><button id="7d-price-change">7d Price Change</button></th>
+                <th><button id="1m-price-change">1m Price Change</button></th>
+                <th><button id="price-distance">Price distance from SMA</button></th>
+                <th><button id="rsi">RSI</button></th>
+                <th>Trading</th>
+            </tr>
+            {% for stock, data in stocks.items() %}
+                <tr> 
+                    <td class ="stock">{{ stock }}</td>
+                    <td>{{ data.name }}</td>
+                    <td>{{ data.close }}</td>
+                    <td class = "week">{{ data.day}}%</td>
+                    <td class = "month">{{ data.month }}%</td>
+                    <td class="sma">{{ data.smachange }}%</td>
+                    <td class = "rsi">{{ data.rsi}}</td>
+                    <td>
+                        <a href="https://www.tradingview.com/symbols/{{ stock }}/" target="_blank">
+                            <img src="/static/query_stats_24dp_FILL0_wght400_GRAD0_opsz24.svg" alt="TradingView">
+                        </a>
+                    </td>
+            {% endfor %}
+        </table>
+    </div>
+
+</body>
+</html>
