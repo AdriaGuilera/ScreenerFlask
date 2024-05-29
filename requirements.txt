@@ -2,3 +2,4 @@ flask
 pandas
 yfinance
 pandas_ta
+gunicorn

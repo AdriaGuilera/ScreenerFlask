@@ -150,3 +150,6 @@ def summary():
 
                 
     return render_template('summary.html', sectors=sectors)
+
+if __name__ == "__main__":
+    app.run(debug=True)

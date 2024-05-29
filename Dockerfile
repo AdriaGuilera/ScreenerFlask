@@ -1,17 +1,11 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# syntax=docker/dockerfile:1
+FROM python:3.8-slim-buster
 
-# Set the working directory in the container to /app
-WORKDIR /app
+WORKDIR /python-docker
 
-# Add the current directory contents into the container at /app
-ADD . /app
+COPY requirements.txt requirements.txt
+RUN pip3 install -r requirements.txt
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
 
-# Make port 8080 available to the world outside this container
-EXPOSE 8080
-
-# Run app.py when the container launches
-CMD ["gunicorn", "-b", ":8080", "app:app"]
+CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
