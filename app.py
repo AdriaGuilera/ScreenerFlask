@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request
 import yfinance as yf
 import talib as ta
@@ -5,6 +6,7 @@ from values import marketcap as MC
 from values import ma as MA
 import pandas as pd
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -12,19 +14,25 @@ app = Flask(__name__)
 def index():
     marketCap = request.args.get("market-cap", None)
     ma = request.args.get("MovingAvarage", None)
+    sec = request.args.get("sector", None)
     stocks = {}
-    sectors = []
+    sectors = [ ]
+    closes = { }
     with open("datasets/nasdaq.csv") as f:
         df = pd.read_csv(f)
-        sectors = pd.unique(df["Industry"])
-    if marketCap and ma:
+        sectors = pd.unique(df.loc[pd.notna(df["Sector"]), "Sector"])
+    if marketCap and ma and sec:
         num_mc = MC[marketCap]
-        print(num_mc)
         num_ma = MA[ma]
-        print(num_ma)
+
         with open("datasets/nasdaq.csv") as f:
             df = pd.read_csv(f)
-            Stocksdf = df.loc[df['Market Cap'] > num_mc, ["Symbol", "Name"]]
+            Stocksdf = []
+            if(sec != "All"):
+                Stocksdf = df.loc[(df['Market Cap'] > num_mc) & (df["Sector"] == sec), ["Symbol", "Name"]]
+            else:
+                Stocksdf = df.loc[(df['Market Cap'] > num_mc), ["Symbol", "Name"]]
+
             for _,stock in Stocksdf.iterrows():
                 filename = f'datasets/Stocks/{stock["Symbol"]}.csv'
                 if os.path.exists(filename):
@@ -32,7 +40,7 @@ def index():
                     if(len(data["Close"]) < num_ma):
                         print(stock["Symbol"] + " has not enough data")
                         continue
-
+                    closes[stock["Symbol"]] = data["Close"].tolist()
                     close = float("{:.2f}".format(data["Close"].iloc[-1]))
                     sma = float("{:.2f}".format(ta.SMA(data["Close"], num_ma).iloc[-1]))
                     change = float("{:.2f}".format((close-sma)/sma*100))
@@ -53,7 +61,9 @@ def index():
                         # Add other data as needed
                     }
 
-    return render_template('index.html', stocks=stocks, sectors=sectors)
+    
+    return render_template('index.html', stocks=stocks, sectors=sectors,closes=closes)
+    
     
 @app.route("/snapshot")
 def snapshot():
@@ -63,7 +73,7 @@ def snapshot():
         for _,stock in Stocksdf.iterrows():
             filename = f'datasets/Stocks/{stock["Symbol"]}.csv'
             if not os.path.exists(filename):
-                data = yf.download(str(stock["Symbol"]), period=str(50) + 'wk', interval='1wk', progress=False)
+                data = yf.download(str(stock["Symbol"]), start="2024-01-01", end=datetime.today(), interval='1wk', progress=False)
                 data.to_csv(filename)
     return {
         'code': 'success'
@@ -71,11 +81,65 @@ def snapshot():
 
 @app.route("/update")
 def update():
-    try:
-        data = yf.download("MSFT", period='3y', interval='1wk', progress=False)
-    except Exception as e:
-        print(f"Error downloading data: {e}")
+    with open("datasets/nasdaq.csv") as f:
+        df = pd.read_csv(f)
+        Stocksdf = df[["Symbol"]]["Symbol"].tolist()
+        for stock in Stocksdf:
+            
+            try:
+                f = open(f'datasets/Stocks/{stock}.csv')
+            except FileNotFoundError:
+               df = df.loc[df['Symbol'] != stock]
+            else:
+                print("Found ")
+        df.to_csv("datasets/nasdaq.csv",index=False)
     return{
         'code': 'success'
     }
+
+@app.route("/summary")
+def summary():
+    sectors = {}
+    with open("datasets/nasdaq.csv") as f:
+        df = pd.read_csv(f)
+        sectorslist= pd.unique(df.loc[pd.notna(df["Sector"]), "Sector"]).tolist()
+        for sector in sectorslist:
+            maxsector = -120
+            maxstock = ""
+            average = []
+            minsector = 1000
+            minstock = ""
+            over= 0
+            stocks = df.loc[(df["Sector"] == sector) & (df["Market Cap"] > 300000000), "Symbol"].tolist()
+            for stock in stocks:
+                filename = f'datasets/Stocks/{stock}.csv'
+                with open(filename) as ff:
+                    data = pd.read_csv(ff)
+
+                    sma = float("{:.2f}".format(ta.SMA(data["Close"], 50).iloc[-1]))
+                    close = float("{:.2f}".format(data["Close"].iloc[-1]))
+                    if(close > sma):
+                        over += 1
+
+                    monthlyChange = float("{:.2f}".format((data["Close"].iloc[-1] - data["Close"].iloc[-4])/data["Close"].iloc[-4]*100))
+                    average.append(monthlyChange)
+                    if monthlyChange > maxsector:
+                        maxsector = monthlyChange
+                        maxstock = stock
+                    if monthlyChange < minsector:
+                        minsector = monthlyChange
+                        minstock = stock
         
+            average = sum(average)/len(average)
+            over = over/len(stocks)*100
+            sectors[sector] = {
+                'average': f'{average:.2f}%',
+                'min': f'{minsector}%',
+                'minstock': minstock,
+                'max': f'{maxsector}%',
+                'maxstock': maxstock,
+                'over50ma': f'{over:.2f}%'
+            }
+
+                
+    return render_template('summary.html', sectors=sectors)

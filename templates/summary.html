@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="/static/styles/style2.css">
+    <script src="/static/colors.js"></script>
+</head>
+<body>
+    <script>
+        let sectors = {{ sectors | tojson | safe }};
+        let gridContainer = document.createElement('div');
+        gridContainer.className = 'grid-container';
+    
+        for (sector in sectors) {
+            let container = document.createElement('div');
+            container.className = 'container';
+
+            let heading = document.createElement('div');
+            heading.className = 'heading';
+
+
+            let headertag = document.createElement('div');
+            headertag.id = 'headertag';
+
+            let img = document.createElement('img');
+            img.src = 'static/label.svg';
+            img.className = 'tag';
+
+            let header = document.createElement('div');
+            header.id = 'header';
+            header.textContent = sector;
+            
+            let datecontainer = document.createElement('div');
+            datecontainer.className= 'datecontainer';
+
+            let calendar = document.createElement('img');
+            calendar.src = 'static/calendar.svg';
+            calendar.className = 'calendar';
+
+            let date = document.createElement('div');
+            date.id = 'date';
+            date.textContent = 'Month';
+            
+            headertag.appendChild(img);
+            headertag.appendChild(header);
+
+            datecontainer.appendChild(calendar);
+            datecontainer.appendChild(date);
+
+            heading.appendChild(headertag);
+            heading.appendChild(datecontainer);
+            
+
+            let line = document.createElement('hr');
+            line.className = 'line';
+
+            let summary = document.createElement('div');
+            summary.id = 'summary';
+
+            console.log(sectors[sector]);
+
+            for (let j = 0; j < 4; j++) {
+                let box = document.createElement('div');
+                box.className = 'box';
+
+                let title = document.createElement('span');
+                title.className = 'title';
+                title.textContent = ['Average return: ', 'Worst Performer: ', 'Best Performer: ', 'Stocks over 50MA: '][j];
+                box.appendChild(title);
+
+                let percentage = document.createElement('span');
+                percentage.className = 'percentage';
+                let ticker = document.createElement('span');
+                ticker.className = 'ticker';
+
+                switch(j){
+                    case 0:
+                        percentage.textContent = sectors[sector]["average"];
+                        box.appendChild(percentage);
+                        percentage.classList.add('change');
+                        break;
+                    
+                    case 1:
+                        percentage.textContent = sectors[sector]["min"];
+                        ticker.textContent = sectors[sector]["minstock"];
+                        percentage.classList.add('change');
+                        box.appendChild(ticker);
+                        box.appendChild(percentage);
+
+                        break;
+                    
+                    case 2:
+                        percentage.textContent = sectors[sector]["max"];
+                        ticker.textContent = sectors[sector]["maxstock"];
+                        box.appendChild(ticker);
+                        percentage.classList.add('change');
+                        box.appendChild(percentage);
+                        
+                        break;
+                    
+                    case 3:
+                        percentage.textContent = sectors[sector]["over50ma"];
+                        box.appendChild(percentage);
+                        break;
+                }
+                summary.appendChild(box);
+            }
+
+            container.appendChild(heading);
+            container.appendChild(line);
+            container.appendChild(summary);
+            gridContainer.appendChild(container);
+            document.body.appendChild(gridContainer);
+
+        }
+    </script>
+    
+</body>
+</html>
