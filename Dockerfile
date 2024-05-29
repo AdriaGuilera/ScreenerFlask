@@ -8,4 +8,5 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+# Use Gunicorn to serve the app on the $PORT environment variable
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
