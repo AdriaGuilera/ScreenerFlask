@@ -1,7 +1,7 @@
 
 from flask import Flask, render_template, request
 import yfinance as yf
-import talib as ta
+import pandas_ta as ta
 from values import marketcap as MC
 from values import ma as MA
 import pandas as pd
@@ -42,9 +42,9 @@ def index():
                         continue
                     closes[stock["Symbol"]] = data["Close"].tolist()
                     close = float("{:.2f}".format(data["Close"].iloc[-1]))
-                    sma = float("{:.2f}".format(ta.SMA(data["Close"], num_ma).iloc[-1]))
+                    sma = float("{:.2f}".format(ta.sma(data["Close"], num_ma).iloc[-1]))
                     change = float("{:.2f}".format((close-sma)/sma*100))
-                    rsi = round(ta.RSI(data["Close"], 14).iloc[-1])
+                    rsi = round(ta.rsi(data["Close"], 14).iloc[-1])
 
                     sevenDayChange = float("{:.2f}".format((data["Close"].iloc[-1] - data["Close"].iloc[-2])/data["Close"].iloc[-2]*100))
                     monthlyChange = float("{:.2f}".format((data["Close"].iloc[-1] - data["Close"].iloc[-4])/data["Close"].iloc[-4]*100))
@@ -85,9 +85,14 @@ def update():
         df = pd.read_csv(f)
         Stocksdf = df[["Symbol"]]["Symbol"].tolist()
         for stock in Stocksdf:
-            
             try:
                 f = open(f'datasets/Stocks/{stock}.csv')
+                data = pd.read_csv(f)
+                if(len(data["Close"]) < 50):
+                    print(stock + " has not enough data")
+                    os.remove(f'datasets/Stocks/{stock}.csv')
+                    df = df.loc[df['Symbol'] != stock]
+                    continue
             except FileNotFoundError:
                df = df.loc[df['Symbol'] != stock]
             else:
@@ -115,8 +120,10 @@ def summary():
                 filename = f'datasets/Stocks/{stock}.csv'
                 with open(filename) as ff:
                     data = pd.read_csv(ff)
-
-                    sma = float("{:.2f}".format(ta.SMA(data["Close"], 50).iloc[-1]))
+                    if(len(data["Close"]) < 50):
+                        print(stock + " has not enough data")
+                        continue
+                    sma = float("{:.2f}".format(ta.sma(data["Close"], 50).iloc[-1]))
                     close = float("{:.2f}".format(data["Close"].iloc[-1]))
                     if(close > sma):
                         over += 1
