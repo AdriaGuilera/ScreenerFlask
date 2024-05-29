@@ -103,6 +103,10 @@ th, td {
   text-align: center;
   border-bottom: 1px solid #ddd;
 }
+.flag{
+  width: 20px;
+  height: 15px;
+}
 
 
 .week,.month,.sma,.rsi{
@@ -111,6 +115,10 @@ th, td {
 
 .stock{
   font-weight: bold;
+}
+.stock:hover{
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 th {

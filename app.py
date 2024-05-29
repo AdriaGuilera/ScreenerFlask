@@ -6,9 +6,13 @@ from values import marketcap as MC
 from values import ma as MA
 import pandas as pd
 import os
+import country_converter as coco
 from datetime import datetime
 
 app = Flask(__name__)
+
+if __name__ == "__main__":
+    app.run(debug=True)
 
 @app.route("/")
 def index():
@@ -31,7 +35,7 @@ def index():
             if(sec != "All"):
                 Stocksdf = df.loc[(df['Market Cap'] > num_mc) & (df["Sector"] == sec), ["Symbol", "Name"]]
             else:
-                Stocksdf = df.loc[(df['Market Cap'] > num_mc), ["Symbol", "Name"]]
+                Stocksdf = df.loc[(df['Market Cap'] > num_mc), ["Symbol", "Name","Country"]]
 
             for _,stock in Stocksdf.iterrows():
                 filename = f'datasets/Stocks/{stock["Symbol"]}.csv'
@@ -58,6 +62,7 @@ def index():
                         'rsi': rsi,
                         'day': sevenDayChange,
                         'month': monthlyChange,
+                        'country': coco.convert(names=stock["Country"], to='ISO2')
                         # Add other data as needed
                     }
 
@@ -151,5 +156,6 @@ def summary():
                 
     return render_template('summary.html', sectors=sectors)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route("/stock/<symbol>")
+def stockinfo(symbol):
+    data = yf.download(symbol)

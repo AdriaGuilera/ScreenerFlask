@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.css">
     <script src="/static/function.js"></script>
     <script type="text/javascript" src="static/jquery.sparkline.js"></script>
+    <script src="/static/stockonclick.js"></script>
     <script>
         $(document).ready(function() {
             let table = $('.stockstable').DataTable({
@@ -91,6 +92,7 @@
                 <tr>
                     <th>Symbol</th>
                     <th>Company Name</th>
+                    <th>Country</th>
                     <th>Close Price</th>
                     <th>7d Price Change</th>
                     <th>1m Price Change</th>
@@ -102,8 +104,9 @@
             </thead>
             {% for stock, data in stocks.items() %}
                 <tr> 
-                    <td class ="stock">{{ stock }}</td>
+                    <td class="stock">{{ stock }}</td>
                     <td>{{ data.name }}</td>
+                    <td class = "no-sort"><img class="flag" src="/static/media/flags/{{data.country}}.svg"></td>
                     <td>{{ data.close }}</td>
                     <td class = "week">{{ data.day}}%</td>
                     <td class = "month">{{ data.month }}%</td>
@@ -112,7 +115,7 @@
                     <td class="sparkline-cell" data-symbol="{{ stock }}"></td> 
                     <td>
                         <a href="https://www.tradingview.com/symbols/{{ stock }}/" target="_blank">
-                            <img src="/static/query_stats_24dp_FILL0_wght400_GRAD0_opsz24.svg" alt="TradingView">
+                            <img src="/static/media/LookTrend.svg" alt="TradingView">
                         </a>
                     </td>
             {% endfor %}
