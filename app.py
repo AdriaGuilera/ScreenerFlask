@@ -11,8 +11,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-if __name__ == "__main__":
-    app.run(debug=True)
 
 @app.route("/")
 def index():
@@ -159,3 +157,6 @@ def summary():
 @app.route("/stock/<symbol>")
 def stockinfo(symbol):
     data = yf.download(symbol)
+
+if __name__ == "__main__":
+    app.run(debug=True)
