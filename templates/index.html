@@ -122,19 +122,19 @@
         </table>
     </div>
     <script>
-        var closes = {{ closes|tojson|safe }};
+        let closesd = {{ closes|tojson|safe}};
         $('.sparkline-cell').each(function(index) {
-            var symbol = $(this).data('symbol');
-            $(this).sparkline(closes[symbol], {
+            let symbol = $(this).data('symbol');
+            $(this).sparkline(closesd[symbol], {
                 type: 'line',
-                fillColor: (closes[symbol][0] < closes[symbol][closes[symbol].length - 1]) ? '#bfefbf' : '#efbfbf',
+                fillColor: (closesd[symbol][0] < closesd[symbol][closesd[symbol].length - 1]) ? '#bfefbf' : '#efbfbf',
                 minSpotColor: false,
                 maxSpotColor: false,
                 highlightSpotColor: false,
                 disableInteraction: true,
                 highlightLineColor: false,
                 drawNormalOnTop: false,
-                lineColor: (closes[symbol][0] < closes[symbol][closes[symbol].length - 1]) ? 'green' : 'red'
+                lineColor: (closesd[symbol][0] < closesd[symbol][closesd[symbol].length - 1]) ? 'green' : 'red'
             });
         });
     </script>
