@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import yfinance as yf
 import pandas_ta as ta
 from values import marketcap as MC
@@ -156,7 +156,12 @@ def summary():
 
 @app.route("/stock/<symbol>")
 def stockinfo(symbol):
-    data = yf.download(symbol)
+    data = yf.Ticker(symbol).info
+
+
+
+    
+    return render_template('stockinfo.html', stock=symbol, data=data)
 
 if __name__ == "__main__":
     app.run(debug=True)

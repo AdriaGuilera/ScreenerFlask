@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{stock}}</title>
+    <script>
+         var stockData = {{ data | tojson }};
+    </script>
+    <script src="/static/individual.js"></script>
+</head>
+<body>
+    <div class="upper-box">
+        <h1 id = "Name">AMD</h1>
+        <p id = "summary"></p>
+        <div id="prices-container">
+            <span id="price"></span>
+            <span id="change"></span>
+        </div>
+    </div>
+    <div class="graph-box">
+    </div>
+
+</body>
+</html>
